@@ -1,0 +1,98 @@
+/*
+ * Banco de Pruebas - Blue Pill (STM32F103C8)
+ *
+ * TODO el cableado del banco se declara aqui: el codigo C no tiene
+ * ningun numero de pin "quemado".
+ *
+ *   USART2 (PA2/PA3)   enlace con el ESP32
+ *   I2C1   (PB6/PB7)   MPU6050, leido por el driver oficial de Zephyr
+ *   PWM2   (PA0)       velocidad del motor DC
+ *   PWM3   (PB0)       servo de la almohadilla de frenado
+ *   PWM1   (PA8)       bocina
+ *   PB12/PB13          direccion del puente H (IN1/IN2)
+ *   PB14               encoder optico (interrupcion por flanco)
+ *   PC13               LED de estado (activo bajo)
+ *
+ * Con st,prescaler = <71> los timers cuentan a 1 MHz (72 MHz / 72).
+ */
+
+&usart2 {
+	status = "okay";
+	pinctrl-0 = <&usart2_tx_pa2 &usart2_rx_pa3>;
+	pinctrl-names = "default";
+	current-speed = <115200>;
+};
+
+&timers1 {
+	status = "okay";
+	st,prescaler = <71>;
+};
+
+&pwm1 {
+	status = "okay";
+	pinctrl-0 = <&tim1_ch1_pa8>;          /* bocina */
+	pinctrl-names = "default";
+};
+
+&timers2 {
+	status = "okay";
+	st,prescaler = <71>;
+};
+
+&pwm2 {
+	status = "okay";
+	pinctrl-0 = <&tim2_ch1_pa0>;          /* motor */
+	pinctrl-names = "default";
+};
+
+&timers3 {
+	status = "okay";
+	st,prescaler = <71>;
+};
+
+&pwm3 {
+	status = "okay";
+	pinctrl-0 = <&tim3_ch3_pb0>;          /* servo */
+	pinctrl-names = "default";
+};
+
+&i2c1 {
+	status = "okay";
+	pinctrl-0 = <&i2c1_scl_pb6 &i2c1_sda_pb7>;
+	pinctrl-names = "default";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+
+	/* Giroscopio/acelerometro por el driver oficial (CONFIG_MPU6050).
+	 * Si el modulo tiene AD0 a nivel alto, cambia el reg a <0x69>. */
+	mpu6050: mpu6050@68 {
+		compatible = "invensense,mpu6050";
+		reg = <0x68>;
+		status = "okay";
+	};
+};
+
+&gpiob {
+	status = "okay";
+};
+
+&gpioc {
+	status = "okay";
+};
+
+/ {
+	/* LED de estado de la placa (PC13, enciende con nivel bajo) */
+	status_leds {
+		compatible = "gpio-leds";
+
+		status_led: status_led {
+			gpios = <&gpioc 13 GPIO_ACTIVE_LOW>;
+		};
+	};
+
+	/* GPIOs genericos del banco: el codigo los toma con GPIO_DT_SPEC_GET */
+	zephyr,user {
+		motor-in1-gpios = <&gpiob 12 GPIO_ACTIVE_HIGH>;
+		motor-in2-gpios = <&gpiob 13 GPIO_ACTIVE_HIGH>;
+		encoder-gpios = <&gpiob 14 GPIO_PULL_DOWN>;
+	};
+};
