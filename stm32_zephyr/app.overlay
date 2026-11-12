@@ -68,6 +68,7 @@
 		compatible = "invensense,mpu6050";
 		reg = <0x68>;
 		status = "okay";
+		accel-fs = <2>;   /* rango +/-2 g (el driver no acepta attr_set) */
 	};
 };
 

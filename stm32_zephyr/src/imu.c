@@ -43,12 +43,16 @@ uint8_t imu_estado(void)
 	return (uint8_t)atomic_get(&estado);
 }
 
-/* Rango del acelerometro: +/-2 g (el mismo ajuste del original). */
+/* Rango del acelerometro: +/-2 g. El driver oficial del MPU6050 no
+ * expone attr_set (el rango real se fija por devicetree, accel-fs=2 en
+ * app.overlay); esta llamada usa el canal correcto SENSOR_CHAN_ACCEL_XYZ
+ * por si la plataforma trae un driver con attr_set, y su retorno se
+ * ignora adrede cuando no esta soportado. */
 static void imu_configurar(void)
 {
 	struct sensor_value rango = {.val1 = 2};
 
-	(void)sensor_attr_set(imu, SENSOR_CHAN_ACCEL,
+	(void)sensor_attr_set(imu, SENSOR_CHAN_ACCEL_XYZ,
 			      SENSOR_ATTR_FULL_SCALE, &rango);
 }
 

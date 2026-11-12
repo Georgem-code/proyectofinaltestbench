@@ -13,3 +13,5 @@ target_sources(app PRIVATE
   src/telemetria.c
   src/crc16.c
 )
+
+target_include_directories(app PRIVATE src)
