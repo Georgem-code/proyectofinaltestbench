@@ -88,7 +88,10 @@ int actuadores_init(void)
 
 	int err = gpio_pin_configure_dt(&in1, GPIO_OUTPUT_INACTIVE);
 
-	err |= gpio_pin_configure_dt(&in2, GPIO_OUTPUT_INACTIVE);
+	if (err != 0) {
+		return err;
+	}
+	err = gpio_pin_configure_dt(&in2, GPIO_OUTPUT_INACTIVE);
 	if (err != 0) {
 		return err;
 	}
